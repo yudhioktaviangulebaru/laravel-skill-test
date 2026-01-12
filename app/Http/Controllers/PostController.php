@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use Exception;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class PostController extends Controller
@@ -71,7 +70,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(PostRequest $request, string $id)
     {
         //
     }

@@ -4,7 +4,6 @@ namespace Tests\Feature\Posts;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 
 class CreatePostTest extends TestCase
@@ -51,7 +50,6 @@ class CreatePostTest extends TestCase
     public function test_post_should_have_title()
     {
         $response = $this->actingAs($this->user)->post(route($this->route.'store'), [
-            'title' => '',
             'content' => 'bar',
         ]);
         $response->assertRedirect(url('/'));
@@ -60,11 +58,8 @@ class CreatePostTest extends TestCase
 
     public function test_post_must_have_content()
     {
-        $user = User::factory()->create();
-        Auth::setUser($user);
-        $response = $this->post(route($this->route.'store'), [
+        $response = $this->actingAs($this->user)->post(route($this->route.'store'), [
             'title' => 'foo',
-            'content' => '',
         ]);
         $response->assertRedirect(url('/'));
         $this->assertDatabaseCount('posts', 0);
