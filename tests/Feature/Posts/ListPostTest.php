@@ -24,9 +24,11 @@ class ListPostTest extends TestCase
     /** @test */
     public function test_can_view_list_posts()
     {
-        $post = Post::factory()->make()->toArray();
+        $post1 = Post::factory()->make()->toArray();
+        $post2 = Post::factory()->make()->toArray();
 
-        $this->actingAs($this->user)->post(route($this->route.'store'), $post);
+        $this->actingAs($this->user)->post(route($this->route.'store'), $post1);
+        $this->actingAs($this->user)->post(route($this->route.'store'), $post2);
 
         $post = Post::first();
         $post->is_draft = false;
@@ -35,5 +37,20 @@ class ListPostTest extends TestCase
 
         $response = $this->actingAs($this->user)->get(route($this->route.'index'));
         $response->assertOk();
+
+        $data = $response->json('data');
+        $this->assertCount(1, $data);
+    }
+
+    public function test_user_cannot_see_draft_post()
+    {
+        $post = Post::factory()->make()->toArray();
+        $this->actingAs($this->user)->post(route($this->route.'store'), $post);
+
+        $response = $this->actingAs($this->user)->get(route($this->route.'index'));
+        $response->assertOk();
+
+        $data = $response->json('data');
+        $this->assertCount(0, $data);
     }
 }
