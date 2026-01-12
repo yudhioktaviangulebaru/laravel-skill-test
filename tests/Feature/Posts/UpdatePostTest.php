@@ -5,6 +5,7 @@ namespace Tests\Feature\Posts;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Metadata\Test;
 use Tests\TestCase;
 
 class UpdatePostTest extends TestCase
@@ -22,7 +23,7 @@ class UpdatePostTest extends TestCase
         $this->otherUser = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function test_allow_authorized_user_to_show_edit_form()
     {
         $postRequest = [

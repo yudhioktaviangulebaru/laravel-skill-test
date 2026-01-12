@@ -5,6 +5,7 @@ namespace Tests\Feature\Posts;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Metadata\Test;
 use Tests\TestCase;
 
 class ShowPostTest extends TestCase
@@ -21,10 +22,13 @@ class ShowPostTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function test_user_can_view_post()
     {
-        $postRequest = Post::factory()->make()->toArray();
+        $postRequest = [
+            'title' => 'foo',
+            'content' => 'bar',
+        ];
 
         $this->actingAs($this->user)->post(route($this->route.'store'), $postRequest);
 
@@ -39,7 +43,10 @@ class ShowPostTest extends TestCase
 
     public function test_user_cannot_view_draft_or_scheduled_post()
     {
-        $postRequest = Post::factory()->make()->toArray();
+        $postRequest = [
+            'title' => 'foo',
+            'content' => 'bar',
+        ];
 
         $this->actingAs($this->user)->post(route($this->route.'store'), $postRequest);
 

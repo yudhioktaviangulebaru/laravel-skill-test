@@ -8,8 +8,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -42,14 +41,13 @@ class PostController extends Controller
     public function store(PostRequest $request): JsonResponse
     {
         $validated = $request->validated();
-
+        $validated['is_draft'] = true;
+        if (isset($validated['published_at']) && $validated['published_at'] !== null) {
+            $validated['is_draft'] = false;
+        }
         $post = Post::create($validated);
 
         $post->load('author');
-
-        if (! $post) {
-            throw new BadRequestException('Failed to create post');
-        }
 
         return response()->json([
             'message' => 'Post created successfully',
@@ -72,7 +70,8 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        Gate::authorize('post-author', $post);
+        $user = Auth::user();
+        abort_unless($user->id === $post->user_id, 403);
 
         return 'posts.edit';
     }
@@ -82,12 +81,10 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, Post $post)
     {
-        Gate::authorize('post-author', $post);
+        $post->load('author');
         $validated = $request->validated();
 
         $post->update($validated);
-
-        $post->load('author');
 
         return response()->json([
             'message' => 'Post updated successfully',
@@ -100,7 +97,8 @@ class PostController extends Controller
      */
     public function destroy(Post $post): JsonResponse
     {
-        Gate::authorize('delete-post', $post);
+        $user = Auth::user();
+        abort_unless($user->id === $post->user_id, 403);
 
         $post->delete();
 

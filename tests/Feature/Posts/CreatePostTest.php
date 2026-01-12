@@ -4,6 +4,7 @@ namespace Tests\Feature\Posts;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Metadata\Test;
 use Tests\TestCase;
 
 class CreatePostTest extends TestCase
@@ -20,10 +21,11 @@ class CreatePostTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function test_allow_authenticated_user_to_view_create_post_form()
     {
-        $this->actingAs($this->user)->get(route($this->route.'create'))
+        $this->actingAs($this->user)
+            ->get(route($this->route.'create'))
             ->assertOk();
     }
 

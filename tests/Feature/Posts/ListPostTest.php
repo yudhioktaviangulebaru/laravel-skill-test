@@ -5,6 +5,7 @@ namespace Tests\Feature\Posts;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Metadata\Test;
 use Tests\TestCase;
 
 class ListPostTest extends TestCase
@@ -21,16 +22,22 @@ class ListPostTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function test_can_view_list_posts()
     {
-        $request1 = Post::factory()->make()->toArray();
-        $request2 = Post::factory()->make()->toArray();
+        $request1 = [
+            'title' => 'foo1',
+            'content' => 'bar1',
+        ];
+        $request2 = [
+            'title' => 'foo2',
+            'content' => 'bar2',
+        ];
 
         $this->actingAs($this->user)->post(route($this->route.'store'), $request1);
         $this->actingAs($this->user)->post(route($this->route.'store'), $request2);
 
-        $post = Post::first();
+        $post = Post::firstWhere(['title' => 'foo1']);
         $post->is_draft = false;
         $post->published_at = now()->subDay();
         $post->save();
@@ -44,10 +51,13 @@ class ListPostTest extends TestCase
 
     public function test_user_cannot_see_draft_post()
     {
-        $request = Post::factory()->make()->toArray();
+        $request = [
+            'title' => 'foo',
+            'content' => 'bar',
+        ];
         $this->actingAs($this->user)->post(route($this->route.'store'), $request);
 
-        $response = $this->actingAs($this->user)->get(route($this->route.'index'));
+        $response = $this->get(route($this->route.'index'));
         $response->assertOk();
 
         $data = $response->json('data');
