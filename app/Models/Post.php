@@ -54,8 +54,7 @@ class Post extends Model
     protected static function boot(): void
     {
         parent::boot();
-        Gate::define('update-post', [PostPolicy::class, 'update']);
-        Gate::define('delete-post', [PostPolicy::class, 'delete']);
+        Gate::define('post-author', [PostPolicy::class, 'postAuthor']);
     }
 
     /**

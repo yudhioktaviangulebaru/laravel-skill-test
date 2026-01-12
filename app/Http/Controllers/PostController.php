@@ -33,7 +33,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return 'post.create';
+        return 'posts.create';
     }
 
     /**
@@ -62,8 +62,7 @@ class PostController extends Controller
      */
     public function show(string $post)
     {
-        $post = Post::active()->findOrFail($post);
-        $post->load('author');
+        $post = Post::with('author')->active()->findOrFail($post);
 
         return new PostResource($post);
     }
@@ -73,9 +72,9 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        Gate::authorize('update-post', $post);
+        Gate::authorize('post-author', $post);
 
-        return 'post.edit';
+        return 'posts.edit';
     }
 
     /**
@@ -83,7 +82,7 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, Post $post)
     {
-        Gate::authorize('update-post', $post);
+        Gate::authorize('post-author', $post);
         $validated = $request->validated();
 
         $post->update($validated);
