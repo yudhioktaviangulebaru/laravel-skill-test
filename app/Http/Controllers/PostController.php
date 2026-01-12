@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
 use App\Http\Resources\PostCollection;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
-use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class PostController extends Controller
 {
@@ -31,25 +33,26 @@ class PostController extends Controller
      */
     public function create()
     {
-        return Inertia::render('posts/create');
+        return 'post.create';
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PostRequest $request)
+    public function store(PostRequest $request): JsonResponse
     {
-        try {
-            $data = $request->validated();
-            $post = Post::create($data);
-            if (! $post) {
-                throw new Exception('Failed to create post');
-            }
+        $validated = $request->validated();
 
-            return redirect()->route('posts.index');
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
+        $post = Post::create($validated);
+
+        if (! $post) {
+            throw new BadRequestException('Failed to create post');
         }
+
+        return response()->json([
+            'message' => 'Post created successfully',
+            'post' => new PostResource($post),
+        ], 201);
     }
 
     /**
@@ -57,29 +60,27 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        try {
-            $post = Post::published()->findOrFail($id);
+        $post = Post::active()
+            ->with('author')
+            ->findOrFail($id);
 
-            return Inertia::render('posts/view', [
-                'post' => $post,
-            ]);
-        } catch (\Throwable $th) {
-            return redirect()->back()->with('error', $th->getMessage());
-        }
+        return new PostResource($post);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Post $post)
     {
-        //
+        Gate::authorize('update-post', $post);
+
+        return 'post.edit';
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(PostRequest $request, string $id)
+    public function update(PostRequest $request, Post $post)
     {
         //
     }

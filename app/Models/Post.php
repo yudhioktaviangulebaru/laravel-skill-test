@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Policies\PostPolicy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * @property int $id
@@ -48,12 +51,16 @@ class Post extends Model
         });
     }
 
+    protected static function boot(): void
+    {
+        parent::boot();
+        Gate::define('update-post', [PostPolicy::class, 'update']);
+    }
+
     /**
      * Scope to show post that is not draft and scheduled
-     *
-     * @param  mixed  $query
      */
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_draft', false)
             ->where('published_at', '<=', now());
