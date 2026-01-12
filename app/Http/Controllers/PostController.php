@@ -45,24 +45,25 @@ class PostController extends Controller
 
         $post = Post::create($validated);
 
+        $post->load('author');
+
         if (! $post) {
             throw new BadRequestException('Failed to create post');
         }
 
         return response()->json([
             'message' => 'Post created successfully',
-            'post' => new PostResource($post),
+            'data' => new PostResource($post),
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $post)
     {
-        $post = Post::active()
-            ->with('author')
-            ->findOrFail($id);
+        $post = Post::active()->findOrFail($post);
+        $post->load('author');
 
         return new PostResource($post);
     }
@@ -82,7 +83,17 @@ class PostController extends Controller
      */
     public function update(PostRequest $request, Post $post)
     {
-        //
+        Gate::authorize('update-post', $post);
+        $validated = $request->validated();
+
+        $post->update($validated);
+
+        $post->load('author');
+
+        return response()->json([
+            'message' => 'Post updated successfully',
+            'data' => new PostResource($post),
+        ], 200);
     }
 
     /**
