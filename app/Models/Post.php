@@ -55,6 +55,7 @@ class Post extends Model
     {
         parent::boot();
         Gate::define('update-post', [PostPolicy::class, 'update']);
+        Gate::define('delete-post', [PostPolicy::class, 'delete']);
     }
 
     /**
