@@ -15,7 +15,7 @@ class CreatePostTest extends TestCase
     private User $user;
 
     /** @test */
-    protected function set_up(): void
+    protected function before_each(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
