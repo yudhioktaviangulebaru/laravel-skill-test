@@ -14,15 +14,16 @@ class CreatePostTest extends TestCase
 
     private User $user;
 
-    /** @test */
-    protected function before_each(): void
+    protected function setUp(): void
     {
         parent::setUp();
         $this->user = User::factory()->create();
     }
 
+    /** @test */
     public function test_can_render_post_create_page()
     {
+
         $response = $this->actingAs($this->user)->get(route($this->route.'create'));
         $response->assertStatus(200);
     }
