@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\PostRequest;
+use App\Http\Resources\PostCollection;
 use App\Models\Post;
 use Exception;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Inertia\Inertia;
 
 class PostController extends Controller
@@ -14,7 +16,14 @@ class PostController extends Controller
      */
     public function index()
     {
-        return Inertia::render('posts/index');
+        /**
+         * @var LengthAwarePaginator<Post>
+         */
+        $list = Post::with('author')->latest()
+            ->active()
+            ->paginate(20);
+
+        return new PostCollection($list);
     }
 
     /**
@@ -49,7 +58,7 @@ class PostController extends Controller
     public function show(string $id)
     {
         try {
-            $post = Post::findOrFail($id);
+            $post = Post::published()->findOrFail($id);
 
             return Inertia::render('posts/view', [
                 'post' => $post,

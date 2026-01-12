@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -22,14 +23,20 @@ class Post extends Model
         'content',
     ];
 
+    protected function casts()
+    {
+        return [
+            'is_draft' => 'boolean',
+            'published_at' => 'datetime',
+        ];
+    }
+
     /**
-     * Summary of author
-     *
-     * @return BelongsTo<User, $this>
+     * Author of the post
      */
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     protected static function booted(): void
@@ -37,18 +44,18 @@ class Post extends Model
         parent::booted();
 
         static::creating(function (Post $post) {
-            $post->setAttribute('user_id', auth()->id());
+            $post->setAttribute('user_id', Auth::id());
         });
     }
 
     /**
-     * Scope a query to only include posts of the current authenticated user.
+     * Scope to show post that is not draft and scheduled
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $query
-     * @return \Illuminate\Database\Eloquent\Builder
+     * @param  mixed  $query
      */
-    public function scopeForCurrentUser($query)
+    public function scopeActive($query)
     {
-        return $query->where('user_id', auth()->id());
+        return $query->where('is_draft', false)
+            ->where('published_at', '<=', now());
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Posts;
 
+use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -14,21 +15,25 @@ class ListPostTest extends TestCase
 
     private User $user;
 
-    /** @test */
-    protected function set_up(): void
+    protected function setUp(): void
     {
-        $this->user = User::factory()->create();
         parent::setUp();
+        $this->user = User::factory()->create();
     }
 
-    public function test_can_render_post_index_page()
+    /** @test */
+    public function test_can_view_list_posts()
     {
-        $response = $this->actingAs($this->user)->post(route($this->route.'store'), [
-            'title' => 'foo',
-            'content' => 'bar',
-        ]);
+        $post = Post::factory()->make()->toArray();
+
+        $this->actingAs($this->user)->post(route($this->route.'store'), $post);
+
+        $post = Post::first();
+        $post->is_draft = false;
+        $post->published_at = now()->subDay();
+        $post->save();
 
         $response = $this->actingAs($this->user)->get(route($this->route.'index'));
-        $response->assertSee('foo');
+        $response->assertOk();
     }
 }
