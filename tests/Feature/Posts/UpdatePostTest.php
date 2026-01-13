@@ -35,7 +35,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
 
-        $response = $this->actingAs($this->user)->get(route($this->route.'edit', $post));
+        $response = $this->actingAs($this->user)->get(route($this->route.'edit', ['post' => $post]));
         $response->assertOk();
     }
 
@@ -50,7 +50,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
 
-        $response = $this->actingAs($this->otherUser)->get(route($this->route.'edit', $post));
+        $response = $this->actingAs($this->otherUser)->get(route($this->route.'edit', ['post' => $post]));
         $response->assertForbidden();
     }
 
@@ -65,7 +65,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
         $postRequest['title'] = 'foo';
-        $response = $this->actingAs($this->user)->put(route($this->route.'update', $post), $postRequest);
+        $response = $this->actingAs($this->user)->put(route($this->route.'update', ['post' => $post]), $postRequest);
         $response->assertOk();
 
         $this->assertDatabaseHas('posts', [
@@ -84,7 +84,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
         $postRequest['title'] = 'foo';
-        $response = $this->actingAs($this->user)->patch(route($this->route.'update', $post), $postRequest);
+        $response = $this->actingAs($this->user)->patch(route($this->route.'update', ['post' => $post]), $postRequest);
         $response->assertOk();
 
         $this->assertDatabaseHas('posts', [
