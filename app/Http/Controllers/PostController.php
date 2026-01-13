@@ -60,11 +60,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        if (! Auth::user()) {
-            return new PostResource($post);
-        }
-        if ($post->user_id != Auth::id()) {
-            abort_unless($post->is_draft && $post->published_at <= now(), 404);
+        if (! $post->isPublished() && auth()->id() !== $post->user_id) {
+            abort(404);
         }
 
         return new PostResource($post);

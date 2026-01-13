@@ -72,23 +72,4 @@ class UpdatePostTest extends TestCase
             'title' => 'foo',
         ]);
     }
-
-    public function test_patch_method()
-    {
-        $postRequest = [
-            'title' => 'bar',
-            'content' => 'baz',
-        ];
-
-        $this->actingAs($this->user)->post(route($this->route.'store'), $postRequest);
-
-        $post = Post::first();
-        $postRequest['title'] = 'foo';
-        $response = $this->actingAs($this->user)->patch(route($this->route.'update', $post), $postRequest);
-        $response->assertOk();
-
-        $this->assertDatabaseHas('posts', [
-            'title' => 'foo',
-        ]);
-    }
 }

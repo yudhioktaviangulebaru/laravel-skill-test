@@ -20,13 +20,10 @@ class Post extends Model
         'user_id',
     ];
 
-    protected function casts()
-    {
-        return [
-            'is_draft' => 'boolean',
-            'published_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'is_draft' => 'boolean',
+        'published_at' => 'datetime',
+    ];
 
     /**
      * Author of the post
@@ -38,8 +35,6 @@ class Post extends Model
 
     protected static function booted(): void
     {
-        parent::booted();
-
         static::creating(function (Post $post) {
             if (is_null($post->is_draft)) {
                 $post->is_draft = is_null($post->published_at);
@@ -55,5 +50,10 @@ class Post extends Model
         return $query->where('is_draft', false)
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
+    }
+
+    public function isPublished(): bool
+    {
+        return ! $this->is_draft && $this->published_at <= now();
     }
 }

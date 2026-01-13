@@ -23,10 +23,10 @@ class PostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['required', 'string'],
-            'published_at' => ['nullable', 'date', 'after_or_equal:now'],
-            'is_draft' => ['nullable', 'boolean'],
+            'title' => 'required|string|max:255',
+            'content' => 'required|string|max:65535', // Tambah max length
+            'is_draft' => 'boolean',
+            'published_at' => 'nullable|date|after_or_equal:now',
         ];
     }
 }
