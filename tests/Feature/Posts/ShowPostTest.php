@@ -43,13 +43,12 @@ class ShowPostTest extends TestCase
 
     public function test_user_can_view_draft_or_scheduled_post()
     {
-        $otherUser = User::factory()->create();
+
         $postRequest = [
             'title' => 'foo',
             'content' => 'bar',
         ];
-
-        $this->actingAs($otherUser)->post(route($this->route.'store'), $postRequest);
+        $this->actingAs($this->user)->post(route($this->route.'store'), $postRequest);
 
         $post = Post::first();
 
@@ -59,16 +58,16 @@ class ShowPostTest extends TestCase
 
     public function test_user_cannot_view_draft_or_scheduled_post()
     {
+        $otherUser = User::factory()->create();
         $postRequest = [
             'title' => 'foo',
             'content' => 'bar',
         ];
 
-        $this->actingAs($this->user)->post(route($this->route.'store'), $postRequest);
-
+        $this->actingAs($otherUser)->post(route($this->route.'store'), $postRequest);
         $post = Post::first();
 
         $response = $this->actingAs($this->user)->get(route($this->route.'show', $post->id));
-        $response->assertOk();
+        $response->assertNotFound();
     }
 }
