@@ -2,20 +2,12 @@
 
 namespace App\Models;
 
-use App\Policies\PostPolicy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
-/**
- * @property int $id
- * @property string $title
- * @property string $content
- * @property int $user_id
- */
 class Post extends Model
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
@@ -24,6 +16,9 @@ class Post extends Model
     protected $fillable = [
         'title',
         'content',
+        'is_draft',
+        'published_at',
+        'user_id',
     ];
 
     protected function casts()
@@ -48,14 +43,10 @@ class Post extends Model
 
         static::creating(function (Post $post) {
             $post->setAttribute('user_id', Auth::id());
+            if (is_null($post->is_draft)) {
+                $post->is_draft = is_null($post->published_at) || $post->published_at < now();
+            }
         });
-    }
-
-    protected static function boot(): void
-    {
-        parent::boot();
-        Gate::define('update-post', [PostPolicy::class, 'update']);
-        Gate::define('delete-post', [PostPolicy::class, 'delete']);
     }
 
     /**

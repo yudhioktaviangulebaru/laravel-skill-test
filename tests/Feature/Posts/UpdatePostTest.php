@@ -5,6 +5,7 @@ namespace Tests\Feature\Posts;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Metadata\Test;
 use Tests\TestCase;
 
 class UpdatePostTest extends TestCase
@@ -22,7 +23,7 @@ class UpdatePostTest extends TestCase
         $this->otherUser = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function test_allow_authorized_user_to_show_edit_form()
     {
         $postRequest = [
@@ -34,7 +35,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
 
-        $response = $this->actingAs($this->user)->get(route($this->route.'edit', $post));
+        $response = $this->actingAs($this->user)->get(route($this->route.'edit', ['post' => $post]));
         $response->assertOk();
     }
 
@@ -49,7 +50,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
 
-        $response = $this->actingAs($this->otherUser)->get(route($this->route.'edit', $post));
+        $response = $this->actingAs($this->otherUser)->get(route($this->route.'edit', ['post' => $post]));
         $response->assertForbidden();
     }
 
@@ -64,7 +65,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
         $postRequest['title'] = 'foo';
-        $response = $this->actingAs($this->user)->put(route($this->route.'update', $post), $postRequest);
+        $response = $this->actingAs($this->user)->put(route($this->route.'update', ['post' => $post]), $postRequest);
         $response->assertOk();
 
         $this->assertDatabaseHas('posts', [
@@ -83,7 +84,7 @@ class UpdatePostTest extends TestCase
 
         $post = Post::first();
         $postRequest['title'] = 'foo';
-        $response = $this->actingAs($this->user)->patch(route($this->route.'update', $post), $postRequest);
+        $response = $this->actingAs($this->user)->patch(route($this->route.'update', ['post' => $post]), $postRequest);
         $response->assertOk();
 
         $this->assertDatabaseHas('posts', [

@@ -8,8 +8,6 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Gate;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
 class PostController extends Controller
 {
@@ -33,7 +31,7 @@ class PostController extends Controller
      */
     public function create()
     {
-        return 'post.create';
+        return 'posts.create';
     }
 
     /**
@@ -47,10 +45,6 @@ class PostController extends Controller
 
         $post->load('author');
 
-        if (! $post) {
-            throw new BadRequestException('Failed to create post');
-        }
-
         return response()->json([
             'message' => 'Post created successfully',
             'data' => new PostResource($post),
@@ -62,8 +56,7 @@ class PostController extends Controller
      */
     public function show(string $post)
     {
-        $post = Post::active()->findOrFail($post);
-        $post->load('author');
+        $post = Post::with('author')->active()->findOrFail($post);
 
         return new PostResource($post);
     }
@@ -73,21 +66,18 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        Gate::authorize('update-post', $post);
 
-        return 'post.edit';
+        return 'posts.edit';
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(PostRequest $request, Post $post)
+    public function update(PostRequest $request, Post $post): JsonResponse
     {
-        Gate::authorize('update-post', $post);
         $validated = $request->validated();
 
         $post->update($validated);
-
         $post->load('author');
 
         return response()->json([
@@ -101,8 +91,6 @@ class PostController extends Controller
      */
     public function destroy(Post $post): JsonResponse
     {
-        Gate::authorize('delete-post', $post);
-
         $post->delete();
 
         return response()->json([
