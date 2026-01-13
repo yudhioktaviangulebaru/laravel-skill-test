@@ -42,9 +42,11 @@ class Post extends Model
         parent::booted();
 
         static::creating(function (Post $post) {
-            $post->setAttribute('user_id', Auth::id());
+            if (! $post->user_id) {
+                $post->user_id = Auth::id();
+            }
             if (is_null($post->is_draft)) {
-                $post->is_draft = is_null($post->published_at) || $post->published_at < now();
+                $post->is_draft = is_null($post->published_at);
             }
         });
     }
@@ -55,6 +57,7 @@ class Post extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_draft', false)
+            ->whereNotNull('published_at')
             ->where('published_at', '<=', now());
     }
 }
