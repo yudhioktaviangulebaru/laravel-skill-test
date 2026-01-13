@@ -8,6 +8,7 @@ use App\Http\Resources\PostResource;
 use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -41,7 +42,10 @@ class PostController extends Controller
     {
         $validated = $request->validated();
 
-        $post = Post::create($validated);
+        $post = Post::create([
+            ...$validated,
+            'user_id' => Auth::id(),
+        ]);
 
         $post->load('author');
 
@@ -54,9 +58,14 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $post)
+    public function show(Post $post)
     {
-        $post = Post::with('author')->active()->findOrFail($post);
+        if (! Auth::user()) {
+            return new PostResource($post);
+        }
+        if ($post->user_id != Auth::id()) {
+            abort_unless($post->is_draft && $post->published_at <= now(), 404);
+        }
 
         return new PostResource($post);
     }
