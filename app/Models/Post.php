@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Auth;
 
 class Post extends Model
 {
@@ -42,9 +41,6 @@ class Post extends Model
         parent::booted();
 
         static::creating(function (Post $post) {
-            if (! $post->user_id) {
-                $post->user_id = Auth::id();
-            }
             if (is_null($post->is_draft)) {
                 $post->is_draft = is_null($post->published_at);
             }

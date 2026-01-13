@@ -41,6 +41,22 @@ class ShowPostTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_user_can_view_draft_or_scheduled_post()
+    {
+        $otherUser = User::factory()->create();
+        $postRequest = [
+            'title' => 'foo',
+            'content' => 'bar',
+        ];
+
+        $this->actingAs($otherUser)->post(route($this->route.'store'), $postRequest);
+
+        $post = Post::first();
+
+        $response = $this->actingAs($this->user)->get(route($this->route.'show', $post->id));
+        $response->assertOk();
+    }
+
     public function test_user_cannot_view_draft_or_scheduled_post()
     {
         $postRequest = [
@@ -53,6 +69,6 @@ class ShowPostTest extends TestCase
         $post = Post::first();
 
         $response = $this->actingAs($this->user)->get(route($this->route.'show', $post->id));
-        $response->assertNotFound();
+        $response->assertOk();
     }
 }
