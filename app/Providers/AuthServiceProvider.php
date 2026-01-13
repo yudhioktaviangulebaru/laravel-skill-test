@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
-use Illuminate\Auth\AuthServiceProvider;
+use App\Models\Post;
+use App\Policies\PostPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 
-class PolicyServiceProvider extends AuthServiceProvider
+class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Post::class => PostPolicy::class,
